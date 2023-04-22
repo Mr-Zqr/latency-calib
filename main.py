@@ -9,7 +9,7 @@ def run_command(command):
     # find sting "std:" in the output and save the data after it as double
     output = output.decode("utf-8")
     print(output)
-    output = output[output.find("std")+5:]
+    output = output[output.find("mean")+5:output.find("median")-1]
     output_std = float(output)
     print("-----------------------------------")
     return output_std
@@ -36,7 +36,7 @@ ref_data_dir = "imuDataRefine.txt"
 cmp_data_dir = "mocapDataRefine.txt"
 
 ref_data_shift_min = -50
-ref_data_shift_max = 50
+ref_data_shift_max = 60
 
 dataModification(cmp_data_dir, ref_data_shift_min, ref_data_shift_max+1, 2000)
 dataModification(ref_data_dir, 0, 1, 2000)
@@ -46,13 +46,15 @@ std = []
 for i in range(ref_data_shift_min, ref_data_shift_max+1):
     cmp_data_dir = "./processedData/mocapDataRefine_" + str(i) + ".txt"
     ref_data_dir = "./processedData/imuDataRefine_0.txt"
-    std.append(run_command("evo_rpe tum " + cmp_data_dir + " " + ref_data_dir + " -va"))
+    std.append(run_command("evo_ape tum " + ref_data_dir + " " + cmp_data_dir + " -r angle_deg"))
 
 # plot the std
 plt.plot(np.arange(ref_data_shift_min, ref_data_shift_max+1), std)
 plt.xlabel("shift/frame")
-plt.ylabel("std")
+plt.ylabel("difference/degree")
+# set x axis to be integer
+plt.xticks(np.arange(ref_data_shift_min, ref_data_shift_max+1, 5))
 # save plot to file, resolution 300 dpi
-plt.savefig("std.png", dpi=300)
+plt.savefig("ape-angle_deg_-50-60.png", dpi=300)
 
 plt.show()
