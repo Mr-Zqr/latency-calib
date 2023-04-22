@@ -29,17 +29,20 @@ def dataModification(fileName, shiftStart, shiftEnd, selectRow):
         # save the file
         fileName_save = "./processedData/" + fileName[0:-4] + "_" + str(i) + ".txt"
         cut_data.to_csv(fileName_save, sep=" ", header=None, index=None)
-        
     print("Data modified and saved")
 
+# the directory of the reference data and the data to be compared
 ref_data_dir = "imuDataRefine.txt"
 cmp_data_dir = "mocapDataRefine.txt"
 
+# the range of the shift of the reference data
 ref_data_shift_min = -50
 ref_data_shift_max = 60
+frame_num = 2000
 
-dataModification(cmp_data_dir, ref_data_shift_min, ref_data_shift_max+1, 2000)
-dataModification(ref_data_dir, 0, 1, 2000)
+# script execution -------------------------------------------------------------------
+dataModification(cmp_data_dir, ref_data_shift_min, ref_data_shift_max+1, frame_num)
+dataModification(ref_data_dir, 0, 1, frame_num)
 
 std = []
 
@@ -48,7 +51,7 @@ for i in range(ref_data_shift_min, ref_data_shift_max+1):
     ref_data_dir = "./processedData/imuDataRefine_0.txt"
     std.append(run_command("evo_ape tum " + ref_data_dir + " " + cmp_data_dir + " -r angle_deg"))
 
-# plot the std
+# plot the average mean
 plt.plot(np.arange(ref_data_shift_min, ref_data_shift_max+1), std)
 plt.xlabel("shift/frame")
 plt.ylabel("difference/degree")
@@ -56,5 +59,4 @@ plt.ylabel("difference/degree")
 plt.xticks(np.arange(ref_data_shift_min, ref_data_shift_max+1, 5))
 # save plot to file, resolution 300 dpi
 plt.savefig("ape-angle_deg_-50-60.png", dpi=300)
-
 plt.show()
